@@ -1,50 +1,55 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: 0.0.0 → 1.0.0 (Initial ratification)
+- List of modified principles:
+  - [PRINCIPLE_1_NAME] → I. PWA & Nuxt.js Framework
+  - [PRINCIPLE_2_NAME] → II. Mobile-First Design
+  - [PRINCIPLE_3_NAME] → III. Offline-First Architecture
+  - [PRINCIPLE_4_NAME] → IV. Serverless Logic & Security
+  - [PRINCIPLE_5_NAME] → V. Vue 3 Best Practices & Modularity
+- Added sections:
+  - Technical & Security Requirements
+  - Development Workflow & Quality Standards
+- Removed sections: None
+- Templates requiring updates:
+  - .specify/templates/plan-template.md: ✅ verified alignment
+  - .specify/templates/spec-template.md: ✅ verified alignment
+  - .specify/templates/tasks-template.md: ✅ verified alignment
+- Follow-up TODOs: None
+-->
+
+# TravelBuddy Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. PWA & Nuxt.js Framework
+The application MUST be developed using Nuxt.js and configured as a Progressive Web App (PWA). This ensures a consistent, high-performance experience across all devices and enables key mobile features like home screen installation and offline access.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Mobile-First Design
+UI/UX development MUST follow a mobile-first approach. All layouts, interactions, and performance optimizations must prioritize the mobile experience before scaling up to larger screens.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Offline-First Architecture
+The application MUST remain functional without an internet connection. Client-side state and critical user data MUST persist robustly in IndexedDB. Synchronization logic must handle intermittent connectivity gracefully.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Serverless Logic & Security
+All sensitive operations, including Gemini API interactions, MUST be performed in serverless functions within the Nuxt `server/` directory. API keys MUST be managed via `.env` files and never exposed to the client.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Vue 3 Best Practices & Modularity
+Code MUST be clean, modular, and adhere to Vue 3 Composition API best practices. Every component and utility MUST be documented. Business logic should be decoupled from UI components where possible.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technical & Security Requirements
+- **Environment Management**: Use `.env` for all secrets and environment-specific configuration.
+- **LLM Integration**: All AI/LLM logic (Gemini) must be encapsulated in server-side services to protect credentials and manage usage.
+- **Data Persistence**: IndexedDB is the primary client-side storage for offline capability. Use a wrapper (like Dexie.js or Pinia with a custom plugin) for robust state management.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow & Quality Standards
+- **Component Design**: Use atomic design or a similar modular structure.
+- **Documentation**: Use TSDoc/JSDoc for all functions and components.
+- **Testing**: Prioritize testing of offline synchronization and serverless logic.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+- **Amendments**: This constitution is the living document of the project. Any amendments require a version bump and a Sync Impact Report.
+- **Compliance**: All Pull Requests must be verified against these core principles.
+- **Versioning**: Follow Semantic Versioning (SemVer) for the constitution itself.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-03-13 | **Last Amended**: 2026-03-13
