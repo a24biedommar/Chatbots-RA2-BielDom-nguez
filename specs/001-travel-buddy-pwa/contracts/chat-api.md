@@ -1,50 +1,53 @@
-# Contract: Chat API (Nitro Proxy)
+# Contracte: API de Xat (Proxy Nitro)
 
 **Endpoint**: `POST /api/chat`  
-**Description**: Proxy for Gemini AI with geolocation and weather context.
+**Descripció**: Proxy per a Gemini AI amb context de geolocalització. La clau API es llegeix de `runtimeConfig.geminiApiKey` (per exemple `GEMINI_API_KEY` a `.env`).
 
-## Request Payload
+## Payload de Petició
 
-| Field | Type | Description |
+| Camp | Tipus | Descripció |
 |-------|------|-------------|
-| prompt | string | User input message |
-| location | object | { lat, lng } coordinates |
-| history | array | Previous chat history turns |
+| prompt | string | Missatge de l'usuari |
+| location | object | Coordenades { lat, lng } (ubicació actual) |
+| history | array | Array de missatges anteriors { role, content } per al context |
 
-## Response Structure (200 OK)
+## Estructura de Resposta (200 OK)
 
-The response MUST be a valid JSON object representing the AI's answer or route generation.
-
-| Field | Type | Description |
+| Camp | Tipus | Descripció |
 |-------|------|-------------|
-| type | "text" \| "route" | Type of response content |
-| content | string | AI's natural language response |
-| route | object (optional) | Full route data if `type === "route"` |
+| type | "text" \| "route" | Tipus de contingut |
+| content | string | Resposta en llenguatge natural |
+| route | object (opcional) | Dades de la ruta si `type === "route"` |
 
-**Route Object Schema**:
+**Schema de l'objecte route** (el prompt del sistema ha d'exigir aquests camps per cada waypoint):
+
 ```json
 {
-  "title": "A Day in [City]",
+  "title": "Ruta de [origen] a [destino]",
+  "metro": "L3, L5",
+  "estimatedTime": "25 min",
   "waypoints": [
     {
-      "title": "Stop Name",
-      "description": "Why visit",
-      "lat": 0.0,
-      "lng": 0.0,
-      "duration": "1h"
+      "title": "Nom de la parada",
+      "description": "Descripció breu",
+      "lat": 41.3851,
+      "lng": 2.1734,
+      "duration": "5 min",
+      "order": 0
     }
   ]
 }
 ```
 
-## Error Handling
+**Important**: Cada waypoint ha de tenir `title`, `description`, `lat`, `lng`, `duration`, `order`. El client ha de normalitzar si l'API retorna `name`/`titol`, `latitude`/`longitude` o `durada` (veure data-model.md).
 
-| Code | Reason | Action |
-|------|--------|--------|
-| 400 | Invalid prompt or context | Prompt for better input |
-| 500 | Gemini API Failure | Notify user, suggest viewing history |
-| 503 | Weather API Failure | Process with generic context |
+## Gestió d'Errors
 
-## Security
-- API keys MUST be injected from `.env` via `process.env.GEMINI_API_KEY`.
-- No client-side exposure of secrets.
+| Codi | Raó | Acció |
+|------|-----|-------|
+| 400 | Prompt o context invàlid | Demanar millor entrada |
+| 500 | Fallada API Gemini | Notificar a l'usuari |
+
+## Seguretat
+- Les claus API s'injecten des de `.env` via `process.env.GEMINI_API_KEY`.
+- Cap secret s'exposa al client.

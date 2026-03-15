@@ -1,87 +1,51 @@
-# Feature Specification: TravelBuddy PWA
+# Feature Specification: TravelBuddy PWA (Consolidated)
 
 **Feature Branch**: `001-travel-buddy-pwa`  
-**Created**: 2026-03-13  
+**Created**: 2026-03-13 (Updated 2026-03-15)  
 **Status**: Draft  
-**Input**: User description: "Desarrolla el documento de especificación técnica SPEC.md para la aplicación TravelBuddy siguiendo una arquitectura de Progressive Web App instalable basada obligatoriamente en el framework Nuxt.js y desplegada en un entorno serverless donde la funcionalidad central sea un chatbot inteligente integrado que consuma la API de Gemini utilizando una clave secreta gestionada de forma segura mediante un archivo .env en el lado del servidor para proteger las credenciales además de implementar una estrategia de persistencia de datos offline-first utilizando IndexedDB en el cliente para almacenar los itinerarios y las rutas generadas permitiendo que el usuario acceda a ellas sin conexión a internet mediante el uso de Service Workers configurados en el frontend de Nuxt mientras que la interfaz de usuario debe estar optimizada para móviles con una página principal para el historial de rutas una sección de chat interactiva que capture geolocalización y clima para personalizar las recomendaciones y un visor de mapas dinámico definiendo claramente los endpoints serverless necesarios para la comunicación entre el frontend y el modelo de IA y detallando la estructura de datos para que el chatbot devuelva siempre respuestas en formato JSON coherente con títulos coordenadas y tiempos estimados."
+**Input**: User description: "Consolidated specification including PWA, AI Chat, Route Details Modal with Manual Save/Rating, Application Routing (/aplicacio), and Catalan ES5 Standards."
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - AI Route Generation (Priority: P1)
+As a traveler, I want to chat with an AI assistant to get personalized travel routes based on my current location and local weather.
+- **Acceptance**: AI returns JSON with waypoints. Chat shows messages with a "Ver" button.
 
-As a traveler, I want to chat with an AI assistant to get personalized travel routes based on my current location and local weather, so that I can plan my day efficiently.
+### User Story 2 - Route Details Modal & Manual Save (Priority: P1)
+As a traveler, I want to see detailed specifications and a map of my route in a dedicated view, rate it with stars, and manually save it to my gallery.
+- **Acceptance**: Clicking "Ver" opens a modal with a green path map (map MUST load and display tiles, markers, and polyline), transport specs, itinerary list with each stop title/duration/description, and "De [origen] a [destí]" visible (no "undefined"). Modal header shows route title and a visible close (X) button on a green background. Rating system (1-5 stars) and "Guardar" button present. Route is ONLY saved to the gallery when the "Guardar" button is pressed.
 
-**Why this priority**: This is the core value proposition of TravelBuddy—providing intelligent, context-aware travel recommendations.
+### User Story 3 - Gallery Management (Priority: P1)
+As a traveler, I want to see my saved routes ordered by rating and be able to search for them.
+- **Acceptance**: Gallery page (`/aplicacio/galeria`) lists routes sorted by stars (highest first). Search filter works by name.
 
-**Independent Test**: Can be tested by initiating a chat, providing a destination or theme, and verifying that the AI returns a structured route with multiple points of interest.
+### User Story 4 - Application Routing & Flow (Priority: P1)
+As a user, I want a clear separation between the landing page and the app interface.
+- **Acceptance**: Landing page contains instructions and a "Comença Ara" button that leads to `/aplicacio/galeria`. App pages (`/aplicacio/*`) show a persistent header with "Xat", "Galeria", and "Sortir" that is always visible (no 0-height or invisible header). The header must be part of the layout so it renders with correct dimensions.
 
-**Acceptance Scenarios**:
-
-1. **Given** the user is in the chat interface, **When** they ask for a "1-day tour of Barcelona", **Then** the system captures geolocation/weather and provides a JSON-structured response with at least 3 stops, including titles and estimated times.
-2. **Given** the user is in the chat interface, **When** the AI generates a route, **Then** the route stops are automatically displayed on a dynamic map.
-
----
-
-### User Story 2 - Offline Route Access (Priority: P2)
-
-As a traveler with limited connectivity, I want my generated routes to be saved automatically on my device so that I can access them even when I have no internet access.
-
-**Why this priority**: Travelers often face connectivity issues; offline access ensures the app remains useful in the field.
-
-**Independent Test**: Generate a route while online, then disable network connectivity and verify the route is still accessible in the history page.
-
-**Acceptance Scenarios**:
-
-1. **Given** a route was previously generated, **When** the user is offline and opens the "Route History", **Then** the list of saved routes is displayed.
-2. **Given** the user is offline, **When** they select a saved route from history, **Then** the full route details and map markers are shown using locally cached data.
-
----
-
-### User Story 3 - PWA Installation & Experience (Priority: P3)
-
-As a frequent user, I want to install TravelBuddy on my home screen so that I can access it quickly like a native app with a mobile-optimized interface.
-
-**Why this priority**: Enhances user retention and provides a more seamless mobile experience.
-
-**Independent Test**: Verify the "Add to Home Screen" prompt appears on supported browsers and the app launches in standalone mode.
-
-**Acceptance Scenarios**:
-
-1. **Given** a mobile browser, **When** the user visits the app, **Then** the UI is responsive and provides a clear prompt or option to install the PWA.
-2. **Given** the app is launched from the home screen, **When** the user navigates between chat and history, **Then** the experience is smooth with no browser chrome visible.
-
----
-
-### Edge Cases
-
-- **GPS Denied**: If the user denies geolocation permission, the AI should prompt for a manual starting location.
-- **API Failure**: If the Gemini API is unreachable or returns an error, the system must provide a user-friendly message and allow the user to retry or view history.
-- **Storage Limit**: If IndexedDB is full, the system should offer to clear old routes to make room for new ones.
+### User Story 5 - Development Standards (Priority: P2)
+As a maintainer, I want the codebase to follow ES5 standards and use Catalan for identifiers and comments.
+- **Acceptance**: Code uses `var`, `function`, traditional loops, and Catalan naming.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
-
-- **FR-001**: The system MUST integrate with the Gemini API using secure server-side calls with environment variables for credentials.
-- **FR-002**: The system MUST implement a mobile-first UI using Nuxt.js, featuring a dashboard for route history and a chat interface.
-- **FR-003**: The system MUST use Service Workers to cache assets and provide a functional offline mode.
-- **FR-004**: The system MUST persist generated routes and chat history in IndexedDB.
-- **FR-005**: The system MUST capture and send the user's geolocation and current weather data to the AI model to contextually enhance recommendations.
-- **FR-006**: The AI model MUST return responses in a standardized JSON format including titles, coordinates (latitude/longitude), and estimated durations.
-- **FR-007**: The system MUST render route coordinates on a dynamic interactive map.
-
-### Key Entities *(include if feature involves data)*
-
-- **Route**: Represents a planned journey. Includes ID, title, timestamp, and an array of Waypoints.
-- **Waypoint**: A specific stop in a route. Includes title, description, latitude, longitude, and estimated duration.
-- **ChatSession**: A collection of messages between the user and the AI, linked to a specific Route if one is generated.
+- **FR-001**: Integration with Gemini API via Nitro proxy (`server/api/chat`).
+- **FR-002**: Routing structure: `/` (Landing), `/aplicacio/chat`, `/aplicacio/galeria`, `/route/:id` (optional detail page).
+- **FR-003**: Header navigation visible ONLY within `/aplicacio` routes. The app shell MUST use Nuxt layouts: `app.vue` MUST wrap `<NuxtPage />` with `<NuxtLayout>` so that `definePageMeta({ layout: 'aplicacio' })` takes effect. The header MUST be rendered with explicit dimensions (e.g. inlined in the layout template or with a wrapper that has fixed height) so it is never 0-height or invisible.
+- **FR-004**: Route saving MUST be manual via modal button.
+- **FR-005**: Modal MUST include a star rating (1-5), a green route line on the map, and the map MUST load correctly inside the modal. Map MUST be created only when the modal is visible (e.g. on `shown.bs.modal`) using a dedicated composable that initializes Leaflet on a plain div container with fixed dimensions (500px), to avoid 0-size or timing issues. On modal close, the map instance MUST be destroyed.
+- **FR-006**: Modal header (title and close X) MUST be readable: green background and white text/icon. Use explicit CSS classes (e.g. `ruta-modal-header`, `ruta-modal-close`) to guarantee contrast.
+- **FR-007**: Waypoints from the API may use `title`/`name`/`titol` and `lat`/`lng` or `latitude`/`longitude`. The client MUST normalize waypoints when receiving a route (and in any map/composable) so that itinerary and "De X a Y" never show "undefined".
+- **FR-008**: Chat MUST have a bottom-fixed input and automatic scroll to the latest message.
+- **FR-009**: Codebase MUST use JavaScript (no TypeScript), ES5-style syntax where required (var, function, no .map/.reduce, no ternary operators if specified), and Catalan documentation/identifiers.
 
 ## Success Criteria *(mandatory)*
-
-### Measurable Outcomes
-
-- **SC-001**: Users can generate a complete 5-stop route through the chat interface in under 15 seconds (end-to-end latency).
-- **SC-002**: 100% of generated routes are automatically saved to local storage for offline retrieval.
-- **SC-003**: The application achieves a Lighthouse PWA score of 90 or higher.
-- **SC-004**: 95% of AI-generated responses adhere to the defined JSON schema, ensuring map rendering reliability.
-- **SC-005**: The application remains functional (viewing history/maps) with 0% network connectivity after the initial load.
+- **SC-001**: Users can view and save routes manually within the modal. The modal map loads and shows the route (tiles, markers, polyline) every time.
+- **SC-002**: 100% of saved routes are accessible offline in the gallery.
+- **SC-003**: Gallery sorts routes correctly by rating.
+- **SC-004**: Header is visible on all `/aplicacio` pages (Galeria, Xat) with correct dimensions.
+- **SC-005**: Modal title and close (X) button are always readable (green header, white text/icon).
+- **SC-006**: Itinerary and "De X a Y" in the modal never display "undefined" (waypoints normalized).
+- **SC-007**: Codebase uses JavaScript (no TypeScript) and adheres to ES5/Catalan constraints where specified.
+- **SC-008**: All internal documentation and identifiers are in Catalan.

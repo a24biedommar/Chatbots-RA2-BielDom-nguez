@@ -1,86 +1,61 @@
-# Implementation Plan: TravelBuddy PWA
+# Implementation Plan: TravelBuddy PWA (Consolidated)
 
-**Branch**: `001-travel-buddy-pwa` | **Date**: 2026-03-13 | **Spec**: [specs/001-travel-buddy-pwa/spec.md](spec.md)
-**Input**: Feature specification from `/specs/001-travel-buddy-pwa/spec.md`
-
-## Summary
-The TravelBuddy PWA is a mobile-first, offline-capable travel assistant. It uses Nuxt 3 as its framework and features an AI-driven chat (Gemini) that provides context-aware (location and weather) travel itineraries. To ensure reliability in areas with poor connectivity, it employs a robust offline-first architecture using `@vite-pwa/nuxt` for Service Workers and `IndexedDB` via `pinia-plugin-persistedstate` for local data persistence.
+**Branch**: `001-travel-buddy-pwa` | **Date**: 2026-03-15 | **Spec**: [spec.md](spec.md)
 
 ## Technical Context
+**Primary Dependencies**: `@vite-pwa/nuxt`, `pinia`, `localforage`, `leaflet`, `@google/generative-ai`.
+**Architecture**: 
+- **Landing Page**: Public instructions page at root `/`.
+- **App Shell**: Protected area at `/aplicacio` with persistent `AppHeader`.
+- **Chat Interface**: Full-screen view with internal scroll and bottom input.
+- **Gallery**: Persistent storage view with filtering and sorting by `rating`.
+- **Legacy Standards**: Strict ES5 syntax (var, traditional loops) and Catalan naming policy.
 
-**Language/Version**: TypeScript / Nuxt 3 (Vue 3)  
-**Primary Dependencies**: `@vite-pwa/nuxt`, `pinia`, `pinia-plugin-persistedstate`, `localforage`, `leaflet`, `@google/generative-ai`  
-**Storage**: IndexedDB (via localforage and pinia-plugin-persistedstate)  
-**Testing**: Vitest (Unit), Playwright (E2E/PWA)  
-**Target Platform**: PWA (Installable Web Application) / Serverless (Nitro)
-**Project Type**: Web application (Nuxt 3)
-**Performance Goals**: < 1s initial load, < 15s for full AI route generation, 60fps map interactions.  
-**Constraints**: Offline-capable (cached assets + persisted state), Mobile-first (responsive UI), Security (server-side API keys).  
-**Scale/Scope**: Initial MVP focusing on Chat, Mapping, and Offline History.
-
-## Constitution Check
-
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-- **PWA Requirement**: ✅ MET via `@vite-pwa/nuxt`.
-- **Nuxt.js Requirement**: ✅ MET (Nuxt 3).
-- **Mobile-First Design**: ✅ MET (UI optimized for mobile screens).
-- **Offline-First Architecture**: ✅ MET (Service Workers + IndexedDB).
-- **Serverless & Security**: ✅ MET (Nitro proxy for Gemini API Key protection).
-- **Vue 3 Best Practices**: ✅ MET (Composition API + Pinia).
-
-## Project Structure
-
-### Documentation (this feature)
-
+## Project Structure (Updated)
 ```text
-specs/001-travel-buddy-pwa/
-├── plan.md              # This file
-├── research.md          # Technology choices and rationale
-├── data-model.md        # Core entities and relationships
-├── quickstart.md        # Setup instructions
-├── contracts/           
-│   └── chat-api.md      # API contract for the AI proxy
-└── tasks.md             # Implementation tasks
-```
-
-### Source Code (repository root)
-
-```text
-# Web application (Nuxt 3)
+app/
+├── app.vue                 # MUST wrap <NuxtPage /> with <NuxtLayout> for layouts to apply
+├── layouts/
+│   ├── default.vue         # Landing + footer (no header)
+│   └── aplicacio.vue       # Header INLINED in template (no component) + <slot />; header 72px, no fixed
+├── components/
+│   ├── chat/
+│   │   └── ChatWindow.vue  # WhatsApp-style chat
+│   ├── ui/
+│   │   └── RouteHistory.vue
+│   └── maps/
+│       └── RouteMap.vue    # Leaflet; used on /route/[id], NOT inside modal
+├── composables/
+│   ├── useLocation.js
+│   └── useModalMap.js      # initModalMap(containerEl, waypoints, center); destroyModalMap()
+├── pages/
+│   ├── index.vue
+│   ├── aplicacio/
+│   │   ├── chat.vue        # definePageMeta({ layout: 'aplicacio' })
+│   │   └── galeria.vue
+│   └── route/
+│       └── [id].vue
+├── stores/
+│   ├── useTravelStore.js   # Persisted routes & ratings
+│   └── useChatStore.js
 server/
-├── api/
-│   └── chat.ts          # Gemini AI proxy (Nitro)
-└── utils/
-    └── weather.ts       # Weather fetching logic
-
-stores/
-├── useTravelStore.ts    # Main state (persisted)
-└── useChatStore.ts      # Chat history (persisted)
-
-components/
-├── chat/
-│   └── ChatWindow.vue   # Chat interface
-├── maps/
-│   └── RouteMap.vue     # Leaflet map integration
-└── ui/
-    └── RouteHistory.vue # Saved routes list
-
-pages/
-├── index.vue            # Dashboard / History
-└── chat.vue             # AI interaction screen
-
-public/
-└── manifest.webmanifest # PWA manifest
-
-nuxt.config.ts           # PWA and module configuration
+└── api/
+    └── chat.js             # Gemini proxy; prompt must require waypoints: title, description, lat, lng, duration, order
 ```
 
-**Structure Decision**: Option 2 (Web application) adjusted for Nuxt 3 directory conventions.
+## Implementation Pitfalls (Avoid These)
+
+1. **Header not showing**: If `app.vue` does not wrap `<NuxtPage />` with `<NuxtLayout>`, the layout (and thus the header) never renders. If the header is a component with `position: fixed` and no wrapper with height, the parent can collapse to 0 height. Fix: use a layout that inlines the header HTML (not a separate component) with explicit height (e.g. 72px).
+2. **Map not loading in modal**: Initializing Leaflet inside a Vue component that is inside a Bootstrap modal often leads to 0-size container (modal hidden at mount). Fix: do NOT use RouteMap inside the modal. Use a plain `<div ref="modalMapContainer">` and call a composable `useModalMap().initModalMap(container, waypoints, center)` in the `shown.bs.modal` event (after a short delay, e.g. 300ms). Call `destroyModalMap()` on `hidden.bs.modal`.
+3. **Modal header title/X invisible**: Generic classes like `bg-emerald` may not apply (scoped or missing). Fix: use explicit classes (e.g. `ruta-modal-header` with `background-color: #10b981`, `ruta-modal-close` with `filter: brightness(0) invert(1)` for white X).
+4. **"De undefined a undefined"**: API or Gemini may return waypoints with `name` instead of `title`, or `latitude`/`longitude` instead of `lat`/`lng`. Fix: normalize waypoints when creating the route from the API response (e.g. `normalizeWaypoint(raw)` mapping title/name/titol, lat/lng/latitude/longitude, duration/durada). Use the same fallbacks in templates (e.g. `wp.title || wp.name || 'Parada N'`).
 
 ## Complexity Tracking
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| PWA Implementation | Core requirement for offline-first UX | Standard Web App (lacks installability and offline resilience) |
-| Server Proxy | Security (Credential Protection) | Client-side Gemini SDK (exposes API keys to public) |
+| Violation | Why Needed | Alternative Rejected |
+|-----------|------------|----------------------|
+| ES5 Syntax | User Constraint | Modern JS (faster dev but fails constraint) |
+| Manual Save | User Control | Auto-save (clutters gallery with junk) |
+| Green Path | UX Clarity | Default Leaflet (standard blue lacks identity) |
+| Map in modal via composable | Reliable render when modal visible | RouteMap component in modal (0-size / timing issues) |
+| Header inlined in layout | Guaranteed dimensions | AppHeader component (fixed = 0-height parent) |
+| Waypoint normalization | API may return name/titol, latitude/longitude | Assuming single schema (causes "undefined") |
