@@ -1,0 +1,13 @@
+# 3. Procés d'especificació
+
+## 3.1 Foundations (El Perquè)
+
+La visió del projecte es va centrar des del primer moment en la resiliència offline-first, entenent que l'experiència d'usuari en dispositius mòbils no podia dependre d'una connectivitat constant. Aquesta premissa va guiar l'elecció del stack tecnològic: Nuxt 3 com a framework modern amb suport natiu per a Progressive Web Apps i IndexedDB com a solució d'emmagatzematge local robust. Es va prioritzar una arquitectura que permetés funcionar sense connexió no per una qüestió de tendència tecnològica, sinó per mitigar el risc inherent a la dependència de xarxa en entorns reals d'ús. Parallelament, es van definir objectes SMART per a cada funcionalitat, establint criteris de compliment mesurables que garantissin un producte mínim viable (MVP) funcional capaç de demostrar el valor de la proposta abans d'expandir característiques.
+
+## 3.2 Specify (El Què)
+
+La fase de especificació es va dur a terme abans d'escriure una sola línia de codi de component, definint regles de negoci i contractes de dades que havien de ser respectats per tots els mòduls del sistema. Es va tractar l'especificació com un contracte obligatori entre el model de llenguatge i la interfície, on cada resposta esperada de la IA havia de complir un esquema JSON predefinit per evitar errors en temps d'execució. Es van preveure casos de vora com ara la gestió d'errors quan la IA genera un JSON mal format, la invalidació de coordenades geogràfiques impossibles o la manca de resposta per timeout de xarxa. Aquesta anticipació permeté implementar una capa de validació estricte al parseig de respostes que convertia qualsevol desviació del contracte en una excepció controlada amb retroalimentació clara a l'usuari.
+
+## 3.3 Planning (El Com)
+
+L'organització tècnica es va materialitzar en el fitxer tasks.md, on cada tasca estava estrictament vinculada a un requisit funcional del document d'especificació. La metodologia SDD va imposar una arquitectura modular on la lògica de dades, gestionada mitjançant stores de Pinia, estava clarament separada de la lògica de visualització dels components Vue, evitant acoblament directe entre les dues capes. El desenvolupament es va dividir en fases lògiques que respectaven unaseqüènca dependent: cada funcionalitat només s'implementava un cop validada documentalment a l'especificació, assegurant traçabilitat entre el requisit i el codi resultant i facilitant la verificació posterior mitjançant checklists de compliment.
